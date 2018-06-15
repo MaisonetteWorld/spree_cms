@@ -5,14 +5,7 @@ module Spree
     validate :no_attachment_errors
 
     has_attached_file :attachment,
-                      styles: {
-                        retina: '2400x>',
-                        large: '1800x>',
-                        medium: '900x>',
-                        small: '500x>',
-                        mini: '200x>',
-                        icon: '50x>'
-                      },
+                      styles: ->(attachment) { attachment.instance.class.styles_lambda(attachment) },
                       default_style: :normal,
                       path: 'media/cmsimage/:id/:style/:basename.:extension',
                       default_url: 'media/cmsimage/:id/:style/:basename.:extension',
@@ -22,6 +15,17 @@ module Spree
       content_type: %w[image/jpeg image/jpg image/png image/gif]
     }
     after_post_process :find_dimensions
+
+    def self.styles_lambda(_attachment)
+      {
+        retina: '2400x>',
+        large: '1800x>',
+        medium: '900x>',
+        small: '500x>',
+        mini: '200x>',
+        icon: '50x>'
+      }
+    end
 
     def url(size)
       attachment.url(size, false)
